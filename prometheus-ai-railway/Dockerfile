@@ -6,6 +6,13 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
+    gfortran \
+    make \
+    libatlas-base-dev \
+    liblapack-dev \
+    libopenblas-dev \
+    libfreetype6-dev \
+    libpng-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Python paketleri
@@ -16,8 +23,6 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Uygulama dosyaları
 COPY . .
 
-# Port
 EXPOSE 8080
 
-# Başlat
 CMD ["python", "app.py"]
