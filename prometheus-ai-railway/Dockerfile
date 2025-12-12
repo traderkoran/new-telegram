@@ -2,33 +2,26 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Minimum gerekli sistem paketleri
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
-    make \
-    libopenblas-dev \
-    liblapack-dev \
-    libfreetype6-dev \
-    libpng-dev \
-    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# pip güncelle
-RUN pip install --no-cache-dir --upgrade pip setuptools wheel
-
-# Bağımlılıkları yükle
+# Copy requirements first for better caching
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Uygulama dosyaları
+# Copy application code
 COPY . .
 
-# Railway Port
-ENV PORT=8080
-EXPOSE 8080
+# Create non-root user
+RUN useradd -m -u 1000 botuser && chown -R botuser:botuser /app
+USER botuser
 
-# Healthcheck — endpoint varsa çalışır
-HEALTHCHECK CMD curl -f http://localhost:${PORT}/ || exit 1
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD python -c "import requests; requests.get('http://localhost:${PORT:-5000}/health', timeout=2)"
 
+# Run the application
 CMD ["python", "-u", "app.py"]
