@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: prometheus-ultra-bot
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: TELEGRAM_TOKEN
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: PORT
+        value: 5000
+    domains:
+      - prometheus-ultra-bot.onrender.com
